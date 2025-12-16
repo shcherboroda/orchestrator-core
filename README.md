@@ -1,6 +1,35 @@
 # Dev Team Orchestrator (DTO)
 
-Bootstrap repository.
+A modular, plugin-based orchestration engine for AI agent teams.
+
+* **Dev team first**: Architect → Developer → QA → Consolidator
+* **Extensible**: add new teams (Marketing, Sales, DevOps) as plugins
+* **Portable**: runs on a VPS, locally, or in Docker/CI
+* **Reusable**: designed to plug into any repo/project (e.g., AOProof)
+
+## Why this exists
+
+DTO is a practical foundation for:
+
+* Using AI agents as a *real* team with clear roles and a controlled workflow
+* Keeping components replaceable (LLM provider, memory store, tools)
+* Productizing the setup later as an integration service for other teams/projects
+
+## Architecture at a glance
+
+DTO is split into **core** and **plugins**:
+
+* **Core**: contracts, orchestrator, pipeline, storage, LLM adapter interface
+* **Plugins**: role implementations (dev team now; marketing later)
+
+Nothing in the core should hardcode a specific LLM vendor, storage backend, or project.
+
+## Repository layout
+
+* `src/dto/core/` — orchestration core (contracts, orchestrator, LLM adapters, storage)
+* `src/dto/plugins/` — role plugins (dev team now, marketing later)
+* `docs/` — project vision and architecture notes
+* `runs/` — saved run outputs (JSON) (ignored by git)
 
 ## Setup (Ubuntu/VPS)
 
@@ -8,38 +37,16 @@ Bootstrap repository.
 ./scripts/install.sh
 source .venv/bin/activate
 cp .env.example .env
-# edit .env
+# edit .env with your LLM settings
+```
 
-Run
-source .venv/bin/activate
-python -m dto.cli run --project aoproof --goal "Сделай план завершения разработки и тестирования AOProof"
+## Status
 
-Artifacts are saved into runs/.
+Bootstrap structure is ready.
 
+Next steps:
 
----
-
-# Запуск
-
-1) Установи:
-```bash
-./scripts/install.sh
-source .venv/bin/activate
-
-
-Конфиг:
-
-cp .env.example .env
-nano .env
-
-
-Запуск:
-
-python -m dto.cli run --project aoproof --goal "Сделай план завершения разработки и тестирования AOProof"
-
-
-Результаты будут:
-
-в терминале (FINAL PLAN)
-
-и файлом в runs/*.json (для истории и “памяти” проекта позже)
+1. Add a runnable CLI command.
+2. Add a "fake LLM" mode for safe pipeline validation.
+3. Add OpenAI-compatible LLM adapter.
+4. Add repo integration tools (read structure, produce patches, PR instructions).
