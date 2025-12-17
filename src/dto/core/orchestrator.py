@@ -12,14 +12,7 @@ class Orchestrator:
         self.registry = registry
         self.store = store
 
-    async def runDevTeamPipeline(self, task: Task) -> PipelineResult:
-        roles = [
-            "Architect",
-            "BackendDev",
-            "QA",
-            "Consolidator",
-        ]
-
+    async def runPipeline(self, task: Task, roles: list[str]) -> PipelineResult:
         results = []
 
         for roleName in roles:

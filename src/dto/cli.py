@@ -1,32 +1,39 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import typer
-from dotenv import load_dotenv
 
 from dto.core.contracts import Task
-from dto.core.llm.openaiCompat import OpenAiCompatLlmClient
+from dto.core.llm.fake import FakeLlmClient
 from dto.core.orchestrator import Orchestrator
 from dto.core.plugins.registry import PluginRegistry
 from dto.core.storage.jsonStore import JsonResultStore
 from dto.plugins import devteam
 
 
-app = typer.Typer(add_completion=False)
+app = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+)
 
 
-@app.command()
-def run(
-    project: str = typer.Option(..., "--project"),
-    goal: str = typer.Option(..., "--goal"),
+@app.callback()
+def root() -> None:
+    """
+    Dev Team Orchestrator CLI.
+    """
+    return
+
+
+@app.command("run")
+def runCommand(
+    project: str = typer.Option(..., "--project", help="Project identifier"),
+    goal: str = typer.Option(..., "--goal", help="High-level goal for the team"),
 ) -> None:
-    load_dotenv()
-
     registry = PluginRegistry()
     devteam.register(registry)
 
-    llm = OpenAiCompatLlmClient()
+    llm = FakeLlmClient()
     store = JsonResultStore()
 
     orchestrator = Orchestrator(
@@ -39,23 +46,29 @@ def run(
         projectId=project,
         goal=goal,
         context={
-            "preferredEnvironment": "Ubuntu VPS",
-            "editor": "VSCode",
+            "environment": "Ubuntu VPS",
         },
         constraints=[
-            "Prefer modular design",
-            "Prefer clear interfaces and replaceable components",
+            "Modular design",
+            "Replaceable components",
         ],
         acceptanceCriteria=[
-            "Concrete plan and task list",
-            "Clear risks and mitigations",
+            "A concrete plan and task list",
         ],
     )
 
-    result = asyncio.run(orchestrator.runDevTeamPipeline(task))
+    roles = [
+        "Architect",
+        "BackendDev",
+        "QA",
+        "Consolidator",
+    ]
+
+    result = asyncio.run(orchestrator.runPipeline(task, roles))
 
     typer.echo("\n=== FINAL PLAN ===\n")
     typer.echo(result.finalSummary)
+    typer.echo("\nSaved into runs/ as JSON")
 
 
 def main() -> None:

@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 from typing import Callable
-from dto.core.contracts import Task, AgentResult
+from dto.core.contracts import AgentResult, Task
 from dto.core.llm.base import LlmClient
-
-
-AgentFactory = Callable[[], "Agent"]
 
 
 class Agent:
@@ -13,6 +10,9 @@ class Agent:
 
     async def run(self, llm: LlmClient, task: Task, previous: list[AgentResult]) -> AgentResult:
         raise NotImplementedError
+
+
+AgentFactory = Callable[[], Agent]
 
 
 class PluginRegistry:

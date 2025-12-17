@@ -1,0 +1,2 @@
+[console_scripts]
+dto = dto.cli:main
