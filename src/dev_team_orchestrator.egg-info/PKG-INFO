@@ -1,9 +1,0 @@
-Metadata-Version: 2.4
-Name: dev-team-orchestrator
-Version: 0.0.1
-Summary: Modular orchestration engine for AI agent teams
-Requires-Python: >=3.10
-Requires-Dist: typer==0.12.5
-Requires-Dist: pydantic==2.9.2
-Requires-Dist: httpx==0.27.2
-Requires-Dist: python-dotenv==1.0.1

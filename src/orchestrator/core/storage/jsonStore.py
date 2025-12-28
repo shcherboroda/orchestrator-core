@@ -1,0 +1,21 @@
+from __future__ import annotations
+
+import os
+import time
+from orchestrator.core.contracts import PipelineResult
+from orchestrator.core.storage.base import ResultStore
+
+
+class JsonResultStore(ResultStore):
+    def __init__(self, baseDir: str = "runs") -> None:
+        self.baseDir = baseDir
+        os.makedirs(self.baseDir, exist_ok=True)
+
+    def save(self, result: PipelineResult) -> str:
+        ts = int(time.time())
+        filePath = os.path.join(self.baseDir, f"{result.task.projectId}-{ts}.json")
+
+        with open(filePath, "w", encoding="utf-8") as f:
+            f.write(result.model_dump_json(indent=2))
+
+        return filePath

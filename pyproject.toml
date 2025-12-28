@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dev-team-orchestrator"
+name = "orchestrator-core"
 version = "0.0.1"
 description = "Modular orchestration engine for AI agent teams"
 requires-python = ">=3.10"
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-dto = "dto.cli:main"
+orchestrator = "orchestrator.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

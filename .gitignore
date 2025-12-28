@@ -10,3 +10,26 @@ runs/
 .DS_Store
 .vscode/
 .idea/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtualenv
+.venv/
+
+# Test artifacts
+.runs-test/
+runs-test/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime artifacts
+runs/
