@@ -50,3 +50,10 @@ Next steps:
 2. Add a "fake LLM" mode for safe pipeline validation.
 3. Add OpenAI-compatible LLM adapter.
 4. Add repo integration tools (read structure, produce patches, PR instructions).
+
+## CLI
+
+`orchestrator run --team <team>` executes a team workflow and prints a JSON array of artifacts to stdout (no extra text). Built-in teams:
+
+- `marketing`: generates a structured marketing plan artifact.
+- `dev`: runs the dev pipeline; requires `--project` and `--goal` and honors `--llm`.

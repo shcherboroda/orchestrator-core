@@ -1,16 +1,10 @@
 from __future__ import annotations
 
-import asyncio
-import os
+import json
 import typer
 from dotenv import load_dotenv
 
-from orchestrator.core.contracts import Task
-from orchestrator.core.llm.factory import LlmFactory
-from orchestrator.core.orchestrator import Orchestrator
-from orchestrator.core.plugins.registry import PluginRegistry
-from orchestrator.core.storage.jsonStore import JsonResultStore
-from orchestrator.plugins import devteam
+from orchestrator.teams import get_team, list_teams
 
 
 app = typer.Typer(
@@ -29,78 +23,48 @@ def root() -> None:
 
 @app.command("run")
 def runCommand(
-    project: str = typer.Option(..., "--project"),
-    goal: str = typer.Option(..., "--goal"),
+    team: str = typer.Option(..., "--team", help="Team to run (marketing | dev)"),
+    project: str | None = typer.Option(None, "--project", help="Project id (required for dev team)"),
+    goal: str | None = typer.Option(None, "--goal", help="Goal for this run"),
     llm: str = typer.Option(
         "fake",
         "--llm",
         help="LLM backend to use: fake | ollama | openai",
     ),
 ) -> None:
+    """
+    Run a team workflow and emit a JSON array of artifacts to stdout.
+    """
     load_dotenv()
 
-    registry = PluginRegistry()
-    devteam.register(registry)
+    try:
+        selected_team = get_team(team)
+    except KeyError:
+        typer.echo(f"Unknown team: {team}. Available: {', '.join(list_teams())}", err=True)
+        raise typer.Exit(code=1)
 
-    llmClient = LlmFactory.create(llm)
-
-    if llm == "fake":
-        llmModel = "fake"
-    elif llm == "ollama":
-        llmModel = os.getenv("DTOollamaModel", "qwen2.5:3b")
-    else:
-        llmModel = os.getenv("DTOllmModel", "gpt-4o-mini")
-
-    store = JsonResultStore()
-
-    orchestrator = Orchestrator(
-        llm=llmClient,
-        llmType=llm,
-        llmModel=llmModel,
-        registry=registry,
-        store=store,
-    )
-
-    contextPath = f"projects/{project}/context.md"
-    projectContext = ""
-
-    if os.path.exists(contextPath):
-        with open(contextPath, "r", encoding="utf-8") as f:
-            projectContext = f.read()
-
-
-    task = Task(
-        projectId=project,
-        goal=goal,
-        context={
-            "projectContext": projectContext,
-        },
-        constraints=[
-            "Modular design",
-            "Replaceable components",
-        ],
-        acceptanceCriteria=[
-            "A concrete plan and task list",
-        ],
-    )
-
-    roles = [
-        "Architect",
-        "BackendDev",
-        "QA",
-        "Consolidator",
-    ]
+    if team == "dev" and project is None:
+        typer.echo("ERROR: --project is required for dev team", err=True)
+        raise typer.Exit(code=1)
 
     try:
-        result = asyncio.run(orchestrator.runPipeline(task, roles))
+        artifacts = selected_team.run(
+            project=project,
+            goal=goal,
+            llm=llm,
+        )
     except Exception as e:
         typer.echo(f"ERROR: {e}", err=True)
         raise typer.Exit(code=1)
 
-    typer.echo("\n=== FINAL PLAN ===\n")
-    typer.echo(result.finalSummary)
-    typer.echo(f"\nLLM used: {llm} ({llmModel})")
-    typer.echo("\nSaved into runs/ as JSON")
+    typer.echo(
+        json.dumps(
+            artifacts,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+    )
 
 
 def main() -> None:
